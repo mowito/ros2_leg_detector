@@ -1,14 +1,15 @@
 #!/usr/bin/python3
 
+from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch_ros.actions import Node
 import launch
 import os
 
-leg_detector_path = os.path.dirname(os.path.abspath('leg_detector_ros2'))
-rosbag_path = leg_detector_path + "/src/leg_detector/rosbag/demos/demo_stationary_simple_environment.bag"
-rviz2_config_path = leg_detector_path + "/src/leg_detector/rosbag/demos/rviz/demo_stationary_simple_environment.rviz"
-forest_file_path = leg_detector_path + "/src/leg_detector/config/trained_leg_detector_res=0.33.yaml"
+leg_detector_path = get_package_share_directory('leg_detector')
+rosbag_path = leg_detector_path + "/rosbag/demos/demo_stationary_simple_environment.bag"
+rviz2_config_path = leg_detector_path + "/rosbag/demos/rviz/demo_stationary_simple_environment.rviz"
+forest_file_path = leg_detector_path + "/config/trained_leg_detector_res=0.33.yaml"
 
 def generate_launch_description():
 

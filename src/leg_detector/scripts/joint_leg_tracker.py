@@ -27,7 +27,6 @@ import scipy.spatial
 from geometry_msgs.msg import PointStamped, Point, Quaternion
 import tf2_ros
 import tf2_py
-import tf2_geometry_msgs
 import tf2_kdl
 import copy
 import timeit

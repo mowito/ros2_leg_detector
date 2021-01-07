@@ -26,7 +26,7 @@ find_package(rosidl_default_generators REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclpy REQUIRED)
 find_package(leg_detector_msgs REQUIRED)
-find_package(OpenCV 3.4.12 REQUIRED)
+find_package(OpenCV 3.3.1 REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
@@ -54,7 +54,6 @@ add_executable (local_occupancy_grid_mapping
                 include/leg_detector/laser_processor.h
                 )
 ament_target_dependencies(local_occupancy_grid_mapping rclcpp leg_detector_msgs OpenCV sensor_msgs tf2 tf2_ros visualization_msgs nav_msgs tf2_geometry_msgs)
-
 add_executable (inflated_human_scan
                 src/inflated_human_scan.cpp
                 )
@@ -67,9 +66,9 @@ install (TARGETS
   DESTINATION lib/${PROJECT_NAME}
 )
 
-install(DIRECTORY
-  launch
-  DESTINATION share/${PROJECT_NAME})
+install(DIRECTORY launch DESTINATION share/${PROJECT_NAME})
+install(DIRECTORY rosbag DESTINATION share/${PROJECT_NAME})
+install(DIRECTORY config DESTINATION share/${PROJECT_NAME})
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
