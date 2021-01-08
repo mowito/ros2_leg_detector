@@ -57,6 +57,20 @@ class OccupancyGridMapping :public rclcpp::Node
             std::string scan_topic;
             grid_centre_pos_found_ = false;
             
+            this->declare_parameter("scan_topic");
+            this->declare_parameter("fixed_frame");
+            this->declare_parameter("base_frame");
+            this->declare_parameter("local_map_topic");
+            this->declare_parameter("local_map_resolution");
+            this->declare_parameter("local_map_cells_per_side");
+            this->declare_parameter("invalid_measurements_are_free_space");
+            this->declare_parameter("unseen_is_free_space");
+            this->declare_parameter("use_scan_header_stamp_for_tfs");
+            this->declare_parameter("shift_threshold");
+            this->declare_parameter("reliable_inf_range");
+            this->declare_parameter("cluster_dist_euclid");
+            this->declare_parameter("min_points_per_cluster");
+            
             this->get_parameter_or("scan_topic", scan_topic, std::string("/scan"));
             this->get_parameter_or("fixed_frame", fixed_frame_, std::string("laser"));
             this->get_parameter_or("base_frame", base_frame_, std::string("base_link"));

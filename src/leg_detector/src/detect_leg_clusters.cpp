@@ -71,6 +71,17 @@ public:
         num_prev_markers_published_ = 0;
         scan_num_ = 0;
 
+        this->declare_parameter("scan_topic");
+        this->declare_parameter("fixed_frame");
+        this->declare_parameter("forest_file");
+        this->declare_parameter("detection_threshold");
+        this->declare_parameter("cluster_dist_euclid");
+        this->declare_parameter("min_points_per_cluster");
+        this->declare_parameter("max_detect_distance");
+        this->declare_parameter("marker_display_lifetime");
+        this->declare_parameter("use_scan_header_stamp_for_tfs");
+        this->declare_parameter("max_detected_clusters");
+
         this->get_parameter_or("scan_topic", scan_topic, std::string("/scan"));
         this->get_parameter_or("fixed_frame", fixed_frame_, std::string("laser"));
         this->get_parameter_or("forest_file", forest_file, std::string("./src/leg_detector/config/trained_leg_detector_res=0.33.yaml"));
