@@ -142,7 +142,7 @@ right now it's trained for laser scanners of 0.33 degree resolution. Different r
 
 ## Acknowledgement
 
-This code is a port the work of A. Leigh on <a href="https://github.com/angusleigh/leg_tracker">leg_detector</a>, for ROS2 Foxy.
+This code is a port of the work of A. Leigh on <a href="https://github.com/angusleigh/leg_tracker">leg_detector</a>, for ROS2 Foxy.
 
 ## References
 
