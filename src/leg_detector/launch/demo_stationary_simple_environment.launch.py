@@ -73,10 +73,22 @@ def generate_launch_description():
         ]    
     )
 
+    # Launching trajectory_prediction node
+    trajectory_prediction_node = Node(
+        package="leg_detector",
+        executable="trajectory_prediction",
+        name="trajectory_prediction",
+        parameters=[
+            {"trajectory_visualization_topic" : "/predicted_trajectories/marker"},
+            {"trajectory_array_topic" : "/trajectories"},
+        ]    
+    )
+
     ld.add_action(detect_leg_clusters_node)
     ld.add_action(joint_leg_tracker_node)
     ld.add_action(inflated_human_scan_node)
     ld.add_action(local_occupancy_grid_mapping_node)
+    ld.add_action(trajectory_prediction_node)
 
     return ld 
  

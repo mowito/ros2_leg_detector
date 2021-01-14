@@ -10,7 +10,7 @@ import signal
 
 
 # Custom messages
-from leg_detector_msgs.msg import Person, PersonArray, Leg, LegArray
+from leg_detector_msgs.msg import Person, PersonArray, Leg, LegArray, Trajectory, TrajectoryArray
 
 # ROS messages
 from visualization_msgs.msg import Marker
@@ -76,6 +76,8 @@ class ObjectTracked:
         self.is_person = is_person
         self.deleted = False
         self.in_free_space = in_free_space
+        self.x_list = [x,]
+        self.y_list = [y,]
 
         # People are tracked via a constant-velocity Kalman filter with a Gaussian acceleration distrubtion
         # Kalman filter params were found by hand-tuning. 
@@ -165,6 +167,9 @@ class ObjectTracked:
         self.vel_x = self.filtered_state_means[2]
         self.vel_y = self.filtered_state_means[3]
 
+        self.x_list.append(self.pos_x)
+        self.y_list.append(self.pos_y)
+
 """
 Tracker for tracking all the people and objects
 """
@@ -214,6 +219,7 @@ class KalmanMultiTrackerNode(Node):
 
     	# ROS publishers
         self.people_tracked_pub = self.create_publisher(PersonArray, "people_tracked", 300)
+        self.trajectory_array_pub = self.create_publisher(TrajectoryArray, "trajectories", 300)
         self.people_detected_pub = self.create_publisher(PersonArray, "people_detected", 300)
         self.marker_pub = self.create_publisher(Marker, "visualization_marker", 300)
         self.non_leg_clusters_pub = self.create_publisher(LegArray, "non_leg_clusters", 300)
@@ -653,6 +659,8 @@ class KalmanMultiTrackerNode(Node):
             transform_available = self.buffer.can_transform(self.fixed_frame, self.publish_people_frame, tf_time)
 
         marker_id = 0
+
+        trajectory_array = []
         if not transform_available:
             self.get_logger().info("Person tracker: tf not avaiable. Not publishing people")
         else :
@@ -772,6 +780,18 @@ class KalmanMultiTrackerNode(Node):
                         marker.id = marker_id
                         marker_id += 1
                         self.marker_pub.publish(marker)
+
+                        if len(person.x_list) > 10:
+                            trajectory = Trajectory()
+                            trajectory.x = person.x_list
+                            trajectory.y = person.y_list
+                            trajectory_array.append(trajectory)
+
+        trajectories = TrajectoryArray()
+        trajectories.trajectories = trajectory_array
+        trajectories.header.frame_id = self.publish_people_frame
+        trajectories.header.stamp = now
+        self.trajectory_array_pub.publish(trajectories)
 
         # Clear previously published people markers
         for m_id in range(marker_id, self.prev_person_marker_id):
