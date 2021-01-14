@@ -22,6 +22,8 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/LegArray.msg"
   "msg/Person.msg"
   "msg/PersonArray.msg"
+  "msg/Trajectory.msg"
+  "msg/TrajectoryArray.msg"
   DEPENDENCIES geometry_msgs std_msgs
 )
 
