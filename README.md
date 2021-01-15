@@ -141,8 +141,7 @@ right now it's trained for laser scanners of 0.33 degree resolution. Different r
 <p>
 
 ## Acknowledgement
-
-This code is a port of the work of A. Leigh on <a href="https://github.com/angusleigh/leg_tracker">leg_detector</a>, for ROS2 Foxy.
+Some parts of <a href="http://wiki.ros.org/leg_detector">http://wiki.ros.org/leg_detector</a> are used. This version is capable of tracking people for much longer time, has less false positives with less data mismatching where a grid occupancy map is not provided a priori. This code is a port of the work of A. Leigh on <a href="https://github.com/angusleigh/leg_tracker">leg_detector</a>, for ROS2 Foxy.
 
 ## References
 
