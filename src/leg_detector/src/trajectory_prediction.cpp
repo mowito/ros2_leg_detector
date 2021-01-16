@@ -1,5 +1,59 @@
 #include "leg_detector/trajectory_prediction.hpp"
 
+void Line::addPoints(std::vector<double> x, std::vector<double> y)
+{
+  double sum_x = 0;
+  double sum_y = 0;
+  double sum_xy = 0;
+  double sum_x2 = 0;
+
+  for (int i = 0; i < static_cast<int>(x.size()); i++) {
+    sum_x += x[i];
+    sum_y += y[i];
+    sum_xy += x[i] * y[i];
+    sum_x2 += x[i] * x[i];
+  }
+  
+  int n = x.size();
+  double x_mean = sum_x / n;
+  double y_mean = sum_y / n;
+  double den  = sum_x2 - sum_x * x_mean;
+
+  if(std::fabs(den) < 1e-7) {
+    this->a = 1;
+    this->b = 0;
+    this->c = -x_mean;
+    return;
+  }
+
+  double slope = (sum_xy - sum_x * y_mean) / den;
+  double y_int = y_mean - slope * x_mean;
+
+  this->b = 1;
+  this->a = -slope;
+  this->c = -y_int;
+}
+
+double Line::getA()
+{
+  return this->a;
+}
+
+double Line::getB()
+{
+  return this->b;
+}
+
+double Line::getC()
+{
+  return this->c;
+}
+
+double Line::getY(double x)
+{
+  return (-this->c - this->a * x) / this->b;
+}
+
 TrajectoryPredictionNode::TrajectoryPredictionNode():
   Node("trajectory_prediction_node")
 {
@@ -19,49 +73,21 @@ TrajectoryPredictionNode::TrajectoryPredictionNode():
   this->trajectoryArraySubscriber_ = this->create_subscription<leg_detector_msgs::msg::TrajectoryArray>(trajectory_array_topic_, default_qos, std::bind(&TrajectoryPredictionNode::trajectoryArrayCallback, this, std::placeholders::_1));
 }
 
-void TrajectoryPredictionNode::pairSort(std::vector<double> &a, std::vector<double> &b)
-{
-  unsigned long int n = static_cast<int>(a.size());
-  std::pair<float, float> pairt[n]; 
-  
-  // Storing the respective array 
-  // elements in pairs. 
-  for (unsigned long int i = 0; i < n; i++) { 
-    pairt[i].first = a[i]; 
-    pairt[i].second = b[i]; 
-  } 
-  
-  // Sorting the pair array. 
-  std::sort(pairt, pairt + n);
-      
-  // Modifying original arrays 
-  for (unsigned long int i = 0; i < n; i++) { 
-    a[i] = pairt[i].first; 
-    b[i] = pairt[i].second; 
-  }
-}
-
 void TrajectoryPredictionNode::trajectoryArrayCallback(const leg_detector_msgs::msg::TrajectoryArray::SharedPtr msg)
 {
   for (long unsigned int i = 0; i < msg->trajectories.size(); i++) {
-    tk::spline s;
+    Line s;
     std::vector<double> x, y;
-    // RCLCPP_INFO(this->get_logger(), "Message arrived! size = %d, %d", msg->trajectories[i].x.size(), msg->trajectories[i].y.size());
-    for (unsigned long int j = std::max(0, static_cast<int>(msg->trajectories[i].x.size()) - 3); j < msg->trajectories[i].x.size(); j++) {
+
+    for (unsigned long int j = std::max(0, static_cast<int>(msg->trajectories[i].x.size()) - 5); j < msg->trajectories[i].x.size(); j++) {
       x.push_back(msg->trajectories[i].x[j]);
       y.push_back(msg->trajectories[i].y[j]);
-      // RCLCPP_INFO(this->get_logger(), "Added point %d.", j+1);  
     }
-    // RCLCPP_INFO(this->get_logger(), "Taking %d points", x.size());
 
     double d = x[x.size() - 1] - x[x.size() - 2];
     double x_ = x[x.size() - 1] + d;
 
-    pairSort(x, y);
-    s.set_points(x, y, true);
-    // RCLCPP_INFO(this->get_logger(), "Fit a spline!");
-
-    // RCLCPP_INFO(this->get_logger(), "d = %f", d);
+    s.addPoints(x, y);
 
     visualization_msgs::msg::Marker m;
     m.header.frame_id = msg->header.frame_id;
@@ -77,24 +103,16 @@ void TrajectoryPredictionNode::trajectoryArrayCallback(const leg_detector_msgs::
     m.scale.x = 0.03;
     m.scale.y = 0.03;
     m.scale.z = 0.03;
-
-    // RCLCPP_INFO(this->get_logger(), "Initialized m");
     
-    for(int j = 0; j < 10; j++) {
+    for(int j = 0; j < 15; j++) {
       geometry_msgs::msg::Point p;
-      // RCLCPP_INFO(this->get_logger(), "Sampling point");
       p.x = x_;
-      p.y = s(x_);
+      p.y = s.getY(x_);
 
-      if (std::hypot(x[x.size() - 1] - x_, y[y.size() - 1] - p.y) > 5)
-        continue;
       m.points.push_back(p);
       x_ += d;
-      // RCLCPP_INFO(this->get_logger(), "Added point %d", j);
     }
-    // RCLCPP_INFO(this->get_logger(), "Predicted trajectory");
     predictedTrajectoryPublisher_->publish(m);
-    // RCLCPP_INFO(this->get_logger(), "Published");
   }
 }
 
